@@ -4,4 +4,4 @@
 **/tmp
 **/__pycache__/
 **.pptx
-
+*.pkl

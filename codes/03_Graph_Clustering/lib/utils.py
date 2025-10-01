@@ -619,6 +619,7 @@ def compute_kernel_kmeans_EM(nc,Ker,Theta,nb_trials):
             O = np.diag( np.array( 1./ (Ones.dot(Theta).dot(F) + 1e-6) ).squeeze() )
             T = Ker.dot(Theta.dot(F.dot(O)))
             D = - 2* T + np.repeat( np.diag(O.dot((F.T).dot(Theta.dot(T))))[None,:] ,n,axis=0)
+            ### LECTURE 3 SLIDE 19 ###
     
             # Extract clusters
             C = np.array(np.argmin(D,1)).squeeze()
@@ -664,14 +665,17 @@ def compute_kernel_kmeans_EM(nc,Ker,Theta,nb_trials):
 ######################################
 
 def compute_kernel_kmeans_spectral(nc,Ker,Theta):
-
+    ### LECTURE 3 SLIDE 30-32 ###
 
     start = time.time()
     n = Ker.shape[0]
     Theta = np.diag(Theta) # Weight for each data
     Ones = np.ones((1,n))
+    print(f"Ker before: {Ker.shape}")
 
     # Eigenvalue Decomposition (EVD)
+    # A is not laplacian matrix. It is a symmetric matrix, that we know for sure has the same eigenvalues as Laplacian
+    # In short, it is a shortcut. No need to compute laplacian
     A = (pow(Theta,0.5)).dot( Ker.dot(pow(Theta,0.5)) )
     lamb, U = scipy.sparse.linalg.eigsh(A, k=nc, which='LM') 
     U = U[:,::-1] # largest = index 0
@@ -680,6 +684,8 @@ def compute_kernel_kmeans_spectral(nc,Ker,Theta):
     # Pre-process embedding coordinates Y
     Y = U - np.mean(U,axis=0) # zero-centered data
     Y = ( Y.T / np.sqrt(np.sum(Y**2,axis=1)+1e-10) ).T # L2 normalization of rows of Y
+    print(f"Ker after: {Ker.shape}")
+    print(Ker)
 
     # Run Standard/Linear K-Means on embedding coordinates Y
     Ker = construct_kernel(Y,'linear')
